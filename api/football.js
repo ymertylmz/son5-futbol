@@ -35,7 +35,7 @@ module.exports = async function handler(req, res) {
 
 
 // ==========================================
-// API-FOOTBALL İSTEK
+// API-FOOTBALL
 // ==========================================
 
 async function apiRequest(path, apiKey) {
@@ -45,24 +45,30 @@ async function apiRequest(path, apiKey) {
     }
   });
 
-  if (!response.ok) {
-    throw new Error(`API-Football HTTP hatası: ${response.status}`);
-  }
-
   const data = await response.json();
 
-  if (
-    data.errors &&
-    (
-      (Array.isArray(data.errors) && data.errors.length > 0) ||
-      (!Array.isArray(data.errors) &&
-        typeof data.errors === "object" &&
-        Object.keys(data.errors).length > 0)
-    )
-  ) {
-    console.error("API errors:", data.errors);
+  if (!response.ok) {
+    throw new Error(
+      `API-Football HTTP ${response.status}`
+    );
+  }
 
-    throw new Error("API-Football veri hatası oluştu.");
+  if (data.errors) {
+    const hasErrors =
+      Array.isArray(data.errors)
+        ? data.errors.length > 0
+        : Object.keys(data.errors).length > 0;
+
+    if (hasErrors) {
+      const message =
+        typeof data.errors === "object"
+          ? JSON.stringify(data.errors)
+          : String(data.errors);
+
+      throw new Error(
+        `API-Football: ${message}`
+      );
+    }
   }
 
   return data;
@@ -88,31 +94,34 @@ async function getFixtures(req, res, apiKey) {
   );
 
   const fixtures = (data.response || [])
-    .map(item => {
-      return {
-        fixtureId: item.fixture.id,
+    .map(item => ({
+      fixtureId: item.fixture.id,
 
-        league: [
-          item.league?.country,
-          item.league?.name
-        ]
-          .filter(Boolean)
-          .join(" • "),
+      league: [
+        item.league?.country,
+        item.league?.name
+      ]
+        .filter(Boolean)
+        .join(" • "),
 
-        time: formatTime(item.fixture.date),
+      time: formatTime(item.fixture.date),
 
-        homeId: item.teams.home.id,
-        home: item.teams.home.name,
+      homeId: item.teams.home.id,
+      home: item.teams.home.name,
 
-        awayId: item.teams.away.id,
-        away: item.teams.away.name,
+      awayId: item.teams.away.id,
+      away: item.teams.away.name,
 
-        status: item.fixture.status.short
-      };
-    })
-    .sort((a, b) => {
-      return (a.time || "").localeCompare(b.time || "");
-    });
+      status: item.fixture.status.short
+    }))
+    .sort((a, b) =>
+      (a.time || "").localeCompare(b.time || "")
+    );
+
+  res.setHeader(
+    "Cache-Control",
+    "s-maxage=60, stale-while-revalidate=300"
+  );
 
   return res.status(200).json({
     fixtures
@@ -121,7 +130,7 @@ async function getFixtures(req, res, apiKey) {
 
 
 // ==========================================
-// İKİ TAKIMI ANALİZ ET
+// ANALİZ
 // ==========================================
 
 async function analyzeTeams(req, res, apiKey) {
@@ -134,10 +143,71 @@ async function analyzeTeams(req, res, apiKey) {
     });
   }
 
-  const [home, away] = await Promise.all([
-    buildTeamAnalysis(homeId, apiKey),
-    buildTeamAnalysis(awayId, apiKey)
+  // İki takımın son 5 maçını çek.
+  // Yalnızca 2 API isteği.
+  const [homeData, awayData] = await Promise.all([
+    apiRequest(
+      `/fixtures?team=${homeId}&last=5&timezone=Europe%2FIstanbul`,
+      apiKey
+    ),
+
+    apiRequest(
+      `/fixtures?team=${awayId}&last=5&timezone=Europe%2FIstanbul`,
+      apiKey
+    )
   ]);
+
+  const homeFixtures = homeData.response || [];
+  const awayFixtures = awayData.response || [];
+
+  // İki takımın maç ID'lerini birleştir.
+  // Aynı maç iki listede varsa tek kez al.
+  const fixtureIds = [
+    ...new Set([
+      ...homeFixtures.map(x => x.fixture.id),
+      ...awayFixtures.map(x => x.fixture.id)
+    ])
+  ];
+
+  let detailedFixtures = [];
+
+  if (fixtureIds.length > 0) {
+    const ids = fixtureIds.join("-");
+
+    // Bütün maç detaylarını TEK API isteğinde al.
+    const details = await apiRequest(
+      `/fixtures?ids=${ids}&timezone=Europe%2FIstanbul`,
+      apiKey
+    );
+
+    detailedFixtures = details.response || [];
+  }
+
+  const detailsMap = new Map();
+
+  detailedFixtures.forEach(item => {
+    detailsMap.set(
+      Number(item.fixture.id),
+      item
+    );
+  });
+
+  const home = buildTeamAnalysis(
+    homeId,
+    homeFixtures,
+    detailsMap
+  );
+
+  const away = buildTeamAnalysis(
+    awayId,
+    awayFixtures,
+    detailsMap
+  );
+
+  res.setHeader(
+    "Cache-Control",
+    "s-maxage=300, stale-while-revalidate=3600"
+  );
 
   return res.status(200).json({
     home,
@@ -147,35 +217,43 @@ async function analyzeTeams(req, res, apiKey) {
 
 
 // ==========================================
-// TAKIMIN SON 5 MAÇI
+// TAKIM ANALİZİ
 // ==========================================
 
-async function buildTeamAnalysis(teamId, apiKey) {
-  const data = await apiRequest(
-    `/fixtures?team=${teamId}&last=5&timezone=Europe%2FIstanbul`,
-    apiKey
-  );
-
-  const fixtures = data.response || [];
-
-  if (fixtures.length === 0) {
+function buildTeamAnalysis(
+  teamId,
+  fixtures,
+  detailsMap
+) {
+  if (!fixtures.length) {
     return {
+      id: teamId,
       name: "Takım",
       matches: [],
       average: null
     };
   }
 
-  const teamName =
-    fixtures[0].teams.home.id === teamId
-      ? fixtures[0].teams.home.name
-      : fixtures[0].teams.away.name;
+  const first = fixtures[0];
 
-  const matches = await Promise.all(
-    fixtures.map(fixture =>
-      buildMatchStats(fixture, teamId, apiKey)
-    )
-  );
+  const teamName =
+    Number(first.teams.home.id) === Number(teamId)
+      ? first.teams.home.name
+      : first.teams.away.name;
+
+  const matches = fixtures.map(baseFixture => {
+    const fixtureId =
+      Number(baseFixture.fixture.id);
+
+    const detailed =
+      detailsMap.get(fixtureId) ||
+      baseFixture;
+
+    return buildMatchStats(
+      detailed,
+      teamId
+    );
+  });
 
   return {
     id: teamId,
@@ -187,34 +265,39 @@ async function buildTeamAnalysis(teamId, apiKey) {
 
 
 // ==========================================
-// TEK MAÇ İSTATİSTİKLERİ
+// MAÇ İSTATİSTİĞİ
 // ==========================================
 
-async function buildMatchStats(fixture, teamId, apiKey) {
-  const fixtureId = fixture.fixture.id;
+function buildMatchStats(fixture, teamId) {
+  const statistics =
+    fixture.statistics || [];
 
-  const statsData = await apiRequest(
-    `/fixtures/statistics?fixture=${fixtureId}`,
-    apiKey
-  );
+  const teamStats =
+    statistics.find(
+      item =>
+        Number(item.team?.id) ===
+        Number(teamId)
+    );
 
-  const teamStats = (statsData.response || []).find(
-    item => Number(item.team.id) === Number(teamId)
-  );
-
-  const stats = teamStats?.statistics || [];
+  const stats =
+    teamStats?.statistics || [];
 
   return {
-    fixtureId,
+    fixtureId: fixture.fixture.id,
 
     date: fixture.fixture.date,
 
     home: fixture.teams.home.name,
+
     away: fixture.teams.away.name,
 
-    score: `${fixture.goals.home ?? "-"}-${fixture.goals.away ?? "-"}`,
+    score:
+      `${fixture.goals.home ?? "-"}-${fixture.goals.away ?? "-"}`,
 
-    shots: getStat(stats, "Total Shots"),
+    shots: getStat(
+      stats,
+      "Total Shots"
+    ),
 
     shotsOnTarget: getStat(
       stats,
@@ -222,7 +305,10 @@ async function buildMatchStats(fixture, teamId, apiKey) {
       "Shots on Target"
     ),
 
-    corners: getStat(stats, "Corner Kicks"),
+    corners: getStat(
+      stats,
+      "Corner Kicks"
+    ),
 
     saves: getStat(
       stats,
@@ -230,7 +316,8 @@ async function buildMatchStats(fixture, teamId, apiKey) {
     ),
 
     isHome:
-      Number(fixture.teams.home.id) === Number(teamId)
+      Number(fixture.teams.home.id) ===
+      Number(teamId)
   };
 }
 
@@ -243,12 +330,18 @@ function getStat(stats, ...names) {
   for (const name of names) {
     const found = stats.find(
       stat =>
-        String(stat.type).toLowerCase() ===
-        String(name).toLowerCase()
+        String(stat.type)
+          .toLowerCase()
+          .trim() ===
+        String(name)
+          .toLowerCase()
+          .trim()
     );
 
     if (found) {
-      return normalizeNumber(found.value);
+      return normalizeNumber(
+        found.value
+      );
     }
   }
 
@@ -261,7 +354,10 @@ function getStat(stats, ...names) {
 // ==========================================
 
 function normalizeNumber(value) {
-  if (value === null || value === undefined) {
+  if (
+    value === null ||
+    value === undefined
+  ) {
     return null;
   }
 
@@ -282,12 +378,15 @@ function normalizeNumber(value) {
 
 
 // ==========================================
-// SON 5 ORTALAMA
+// ORTALAMA
 // ==========================================
 
 function calculateAverage(matches) {
   return {
-    shots: average(matches, "shots"),
+    shots: average(
+      matches,
+      "shots"
+    ),
 
     shotsOnTarget: average(
       matches,
@@ -316,17 +415,19 @@ function average(items, key) {
         Number.isFinite(value)
     );
 
-  if (values.length === 0) {
+  if (!values.length) {
     return null;
   }
 
   const total = values.reduce(
-    (sum, value) => sum + value,
+    (sum, value) =>
+      sum + value,
     0
   );
 
   return Number(
-    (total / values.length).toFixed(1)
+    (total / values.length)
+      .toFixed(1)
   );
 }
 
@@ -336,7 +437,9 @@ function average(items, key) {
 // ==========================================
 
 function formatTime(dateString) {
-  if (!dateString) return "";
+  if (!dateString) {
+    return "";
+  }
 
   return new Intl.DateTimeFormat(
     "tr-TR",
@@ -346,5 +449,7 @@ function formatTime(dateString) {
       minute: "2-digit",
       hour12: false
     }
-  ).format(new Date(dateString));
+  ).format(
+    new Date(dateString)
+  );
 }
