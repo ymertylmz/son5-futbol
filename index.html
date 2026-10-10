@@ -1,1232 +1,310 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-  <meta charset="UTF-8" />
-
-  <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0, viewport-fit=cover"
-  />
-
-  <meta name="theme-color" content="#07111f" />
-
-  <title>Son 5 Radar</title>
-
-  <!-- PWA -->
-  <link rel="manifest" href="/manifest.json">
-
-  <!-- iPhone uygulama görünümü -->
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#07111f">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="mobile-web-app-capable" content="yes">
-
-  <meta
-    name="apple-mobile-web-app-status-bar-style"
-    content="black-translucent"
-  >
-
-  <meta
-    name="apple-mobile-web-app-title"
-    content="Son 5 Radar"
-  >
-
-  <!-- Uygulama ikonları -->
-  <link
-    rel="apple-touch-icon"
-    href="/icon-192.png"
-  >
-
-  <link
-    rel="icon"
-    type="image/png"
-    href="/icon-192.png"
-  >
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Son 5 Radar">
+  <title>Son 5 Radar</title>
+  <link rel="manifest" href="/manifest.json">
+  <link rel="apple-touch-icon" href="/icon-192.png">
+  <link rel="icon" type="image/png" href="/icon-192.png">
 
   <style>
-
-    * {
-      box-sizing: border-box;
-      -webkit-tap-highlight-color: transparent;
-    }
-
-    html {
-      background: #07111f;
-    }
-
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    html { background: #07111f; }
     body {
       margin: 0;
-
-      font-family:
-        -apple-system,
-        BlinkMacSystemFont,
-        "Segoe UI",
-        sans-serif;
-
-      background:
-        radial-gradient(
-          circle at top right,
-          #12315a 0%,
-          transparent 30%
-        ),
-        linear-gradient(
-          180deg,
-          #07111f 0%,
-          #091827 100%
-        );
-
-      color: #ffffff;
-
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: #fff;
+      background: radial-gradient(circle at top right, #12315a 0%, transparent 30%),
+                  linear-gradient(180deg, #07111f 0%, #091827 100%);
       min-height: 100vh;
       min-height: 100dvh;
-
-      padding-top:
-        env(safe-area-inset-top);
-
-      padding-bottom:
-        env(safe-area-inset-bottom);
+      padding-top: env(safe-area-inset-top);
+      padding-bottom: env(safe-area-inset-bottom);
     }
-
-    .app {
-      width: 100%;
-      max-width: 760px;
-      margin: auto;
-
-      padding:
-        18px
-        14px
-        calc(
-          60px +
-          env(safe-area-inset-bottom)
-        );
-    }
-
-    .header {
-      padding:
-        12px
-        4px
-        22px;
-    }
-
-    .logo {
-      font-size: 13px;
-
-      color: #51d59a;
-
-      font-weight: 800;
-
-      letter-spacing: 1.5px;
-
-      text-transform: uppercase;
-    }
-
-    h1 {
-      margin:
-        7px
-        0
-        6px;
-
-      font-size: 30px;
-
-      line-height: 1.05;
-    }
-
-    .subtitle {
-      margin: 0;
-
-      color: #91a7bd;
-
-      font-size: 14px;
-
-      line-height: 1.5;
-    }
-
-    .card {
-      background:
-        rgba(
-          15,
-          31,
-          49,
-          0.94
-        );
-
-      border:
-        1px solid
-        rgba(
-          255,
-          255,
-          255,
-          0.08
-        );
-
-      border-radius: 18px;
-
-      padding: 16px;
-
-      margin-bottom: 14px;
-
-      box-shadow:
-        0
-        12px
-        30px
-        rgba(
-          0,
-          0,
-          0,
-          .18
-        );
-    }
-
-    .section-title {
-      font-size: 15px;
-
-      font-weight: 800;
-
-      margin-bottom: 12px;
-    }
-
-    .date-row {
-      display: flex;
-
-      gap: 10px;
-    }
-
-    input[type="date"] {
-      width: 100%;
-
-      background: #091625;
-
-      color: white;
-
-      border:
-        1px solid
-        #29445f;
-
-      border-radius: 12px;
-
-      padding: 13px;
-
-      font-size: 16px;
-
-      outline: none;
-    }
-
-    button {
-      border: 0;
-
-      border-radius: 12px;
-
-      font-size: 15px;
-
-      font-weight: 800;
-
-      cursor: pointer;
-
-      font-family: inherit;
-    }
-
-    .primary {
-      width: 100%;
-
-      margin-top: 12px;
-
-      padding: 14px;
-
-      background: #35d28c;
-
-      color: #04140d;
-    }
-
-    .primary:active {
-      transform:
-        scale(.99);
-    }
-
-    .status {
-      text-align: center;
-
-      color: #91a7bd;
-
-      font-size: 14px;
-
-      padding:
-        30px
-        10px;
-    }
-
-    .match {
-      background: #0b1a29;
-
-      border:
-        1px solid
-        #203850;
-
-      border-radius: 15px;
-
-      padding: 14px;
-
-      margin-bottom: 10px;
-
-      cursor: pointer;
-    }
-
-    .match:active {
-      transform:
-        scale(.99);
-    }
-
-    .match-time {
-      font-size: 12px;
-
-      color: #6f8ba6;
-
-      margin-bottom: 9px;
-    }
-
-    .teams {
-      display: flex;
-
-      justify-content:
-        space-between;
-
-      align-items:
-        center;
-
-      gap: 10px;
-    }
-
-    .team {
-      flex: 1;
-
-      font-size: 15px;
-
-      font-weight: 750;
-    }
-
-    .team.right {
-      text-align: right;
-    }
-
-    .vs {
-      color: #35d28c;
-
-      font-size: 11px;
-
-      font-weight: 900;
-    }
-
-    .hidden {
-      display: none;
-    }
-
-    .back {
-      background: transparent;
-
-      color: #9ab2c9;
-
-      padding:
-        6px
-        0
-        15px;
-
-      font-size: 14px;
-    }
-
-    .fixture-title {
-      text-align: center;
-
-      font-size: 21px;
-
-      font-weight: 850;
-
-      margin:
-        4px
-        0
-        18px;
-    }
-
-    .team-box {
-      background: #0b1a29;
-
-      border-radius: 16px;
-
-      border:
-        1px solid
-        #203850;
-
-      padding: 14px;
-
-      margin-bottom: 15px;
-    }
-
-    .team-name {
-      font-size: 20px;
-
-      font-weight: 850;
-
-      margin-bottom: 4px;
-    }
-
-    .team-note {
-      color: #718aa2;
-
-      font-size: 12px;
-
-      margin-bottom: 14px;
-    }
-
-    .game-card {
-      border-top:
-        1px solid
-        #1a3248;
-
-      padding:
-        13px
-        0;
-    }
-
-    .game-card:first-of-type {
-      border-top: 0;
-    }
-
-    .game-head {
-      display: flex;
-
-      justify-content:
-        space-between;
-
-      gap: 10px;
-
-      align-items:
-        center;
-
-      margin-bottom: 10px;
-    }
-
-    .opponent {
-      font-size: 14px;
-
-      font-weight: 750;
-    }
-
-    .score {
-      font-weight: 900;
-
-      font-size: 16px;
-
-      color: #35d28c;
-
-      white-space: nowrap;
-    }
-
-    .stats {
-      display: grid;
-
-      grid-template-columns:
-        repeat(
-          2,
-          1fr
-        );
-
-      gap: 8px;
-    }
-
-    .stat {
-      background: #071521;
-
-      border-radius: 10px;
-
-      padding: 9px;
-    }
-
-    .stat-label {
-      display: block;
-
-      font-size: 10px;
-
-      color: #6e879f;
-
-      margin-bottom: 4px;
-    }
-
-    .stat-value {
-      font-size: 16px;
-
-      font-weight: 850;
-    }
-
-    .average {
-      margin-top: 14px;
-
-      background:
-        linear-gradient(
-          135deg,
-          #133c34,
-          #0b2825
-        );
-
-      border:
-        1px solid
-        #276f5a;
-
-      border-radius: 14px;
-
-      padding: 13px;
-    }
-
-    .average-title {
-      font-size: 12px;
-
-      color: #75e2b5;
-
-      font-weight: 900;
-
-      margin-bottom: 10px;
-    }
-
-    .error {
-      background: #3a1720;
-
-      border:
-        1px solid
-        #743344;
-
-      padding: 13px;
-
-      border-radius: 12px;
-
-      color: #ffb9c5;
-
-      font-size: 13px;
-    }
-
-    .loader {
-      width: 28px;
-
-      height: 28px;
-
-      border:
-        3px solid
-        #213b52;
-
-      border-top-color:
-        #35d28c;
-
-      border-radius: 50%;
-
-      animation:
-        spin
-        .7s
-        linear
-        infinite;
-
-      margin:
-        25px
-        auto
-        12px;
-    }
-
-    @keyframes spin {
-      to {
-        transform:
-          rotate(360deg);
-      }
-    }
-
+    .app { width: 100%; max-width: 760px; margin: auto;
+           padding: 18px 14px calc(60px + env(safe-area-inset-bottom)); }
+    .header { padding: 12px 4px 22px; }
+    .logo { font-size: 13px; color: #51d59a; font-weight: 800;
+            letter-spacing: 1.5px; text-transform: uppercase; }
+    h1 { margin: 7px 0 6px; font-size: 30px; line-height: 1.05; }
+    .subtitle { margin: 0; color: #91a7bd; font-size: 14px; line-height: 1.5; }
+    .card { background: rgba(15,31,49,.94); border: 1px solid rgba(255,255,255,.08);
+            border-radius: 18px; padding: 16px; margin-bottom: 14px;
+            box-shadow: 0 12px 30px rgba(0,0,0,.18); }
+    .section-title { font-size: 15px; font-weight: 800; margin-bottom: 12px; }
+    .date-row { display: flex; gap: 10px; }
+    input[type="date"] { width: 100%; background: #091625; color: white;
+      border: 1px solid #29445f; border-radius: 12px; padding: 13px;
+      font-size: 16px; outline: none; color-scheme: dark; }
+    button { border: 0; border-radius: 12px; font-size: 15px; font-weight: 800;
+             cursor: pointer; font-family: inherit; }
+    .primary { width: 100%; margin-top: 12px; padding: 14px;
+               background: #35d28c; color: #04140d; }
+    .primary:active { transform: scale(.99); }
+    .status { text-align: center; color: #91a7bd; font-size: 14px;
+              padding: 30px 10px; }
+    .match { display: block; width: 100%; text-align: left; color: #fff;
+      background: #0b1a29; border: 1px solid #203850;
+      border-radius: 15px; padding: 14px; margin-bottom: 10px; cursor: pointer; }
+    .match:active { transform: scale(.99); }
+    .match-time { font-size: 12px; color: #6f8ba6; margin-bottom: 9px; }
+    .teams { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+    .team { flex: 1; font-size: 15px; font-weight: 750; overflow-wrap: anywhere; }
+    .team.right { text-align: right; }
+    .vs { color: #35d28c; font-size: 11px; font-weight: 900; }
+
+    /* SON BAKILAN MAÇ: Tasarımı değiştirmeden küçük bir işaret. */
+    .match.last-viewed { border-color: #35d28c; box-shadow: 0 0 0 1px rgba(53,210,140,.17); }
+    .match.last-viewed::after { content: "📍 Son baktığın maç"; display: block;
+      margin-top: 11px; color: #75e2b5; font-size: 12px; font-weight: 750; }
+
+    .hidden { display: none !important; }
+    .back { background: transparent; color: #9ab2c9;
+            padding: 6px 0 15px; font-size: 14px; }
+    .fixture-title { text-align: center; font-size: 21px; font-weight: 850;
+                     margin: 4px 0 18px; }
+    .team-box { background: #0b1a29; border-radius: 16px; border: 1px solid #203850;
+                padding: 14px; margin-bottom: 15px; }
+    .team-name { font-size: 20px; font-weight: 850; margin-bottom: 4px; }
+    .team-note { color: #718aa2; font-size: 12px; margin-bottom: 14px; }
+    .game-card { border-top: 1px solid #1a3248; padding: 13px 0; }
+    .game-card:first-of-type { border-top: 0; }
+    .game-head { display: flex; justify-content: space-between; gap: 10px;
+                 align-items: center; margin-bottom: 10px; }
+    .opponent { font-size: 14px; font-weight: 750; }
+    .score { font-size: 16px; color: #35d28c; white-space: nowrap; font-weight: 900; }
+    .stats { display: grid; grid-template-columns: repeat(2,1fr); gap: 8px; }
+    .stat { background: #071521; border-radius: 10px; padding: 9px; }
+    .stat-label { display: block; font-size: 10px; color: #6e879f; margin-bottom: 4px; }
+    .stat-value { font-size: 16px; font-weight: 850; }
+    .average { margin-top: 14px; background: linear-gradient(135deg,#133c34,#0b2825);
+               border: 1px solid #276f5a; border-radius: 14px; padding: 13px; }
+    .average-title { font-size: 12px; color: #75e2b5; font-weight: 900;
+                     margin-bottom: 10px; }
+    .error { background: #3a1720; border: 1px solid #743344; padding: 13px;
+             border-radius: 12px; color: #ffb9c5; font-size: 13px; }
+    .loader { width: 28px; height: 28px; border: 3px solid #213b52;
+              border-top-color: #35d28c; border-radius: 50%;
+              animation: spin .7s linear infinite; margin: 25px auto 12px; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .bottom-back { margin-top: 12px; }
   </style>
 </head>
 
 <body>
-
 <div class="app">
-
   <div class="header">
-
-    <div class="logo">
-      ⚽ Son 5 Radar
-    </div>
-
-    <h1>
-      Maçı seç.<br>
-      Son 5'i gör.
-    </h1>
-
-    <p class="subtitle">
-      Takımların tamamlanmış
-      son 5 maçındaki temel
-      istatistiklerini karşılaştır.
-    </p>
-
+    <div class="logo">⚽ Son 5 Radar</div>
+    <h1>Maçı seç.<br>Son 5'i gör.</h1>
+    <p class="subtitle">Takımların tamamlanmış son 5 maçındaki temel istatistiklerini karşılaştır.</p>
   </div>
-
-
-  <!-- ANA SAYFA -->
 
   <div id="homeView">
-
     <div class="card">
-
-      <div class="section-title">
-        📅 Maç tarihi
-      </div>
-
-      <div class="date-row">
-
-        <input
-          type="date"
-          id="matchDate"
-        >
-
-      </div>
-
-      <button
-        class="primary"
-        onclick="loadFixtures()"
-      >
-        Günün Maçlarını Getir
-      </button>
-
+      <div class="section-title">📅 Maç tarihi</div>
+      <div class="date-row"><input type="date" id="matchDate"></div>
+      <button class="primary" type="button" onclick="loadFixtures()">Günün Maçlarını Getir</button>
     </div>
-
-
     <div class="card">
-
-      <div class="section-title">
-        ⚽ Maçlar
-      </div>
-
-      <div
-        id="fixtureList"
-        class="status"
-      >
-        Tarihi seçip maçları getir.
-      </div>
-
+      <div class="section-title">⚽ Maçlar</div>
+      <div id="fixtureList" class="status">Tarihi seçip maçları getir.</div>
     </div>
-
   </div>
 
-
-  <!-- ANALİZ SAYFASI -->
-
-  <div
-    id="analysisView"
-    class="hidden"
-  >
-
-    <button
-      class="back"
-      onclick="goBack()"
-    >
-      ← Maçlara dön
-    </button>
-
+  <div id="analysisView" class="hidden">
+    <button class="back" type="button" onclick="goBack()">← Maçlara dön</button>
     <div id="analysisContent"></div>
-
+    <button class="primary bottom-back" type="button" onclick="goBack()">← Maç listesine dön</button>
   </div>
-
 </div>
 
-
 <script>
+  const fixtureList = document.getElementById('fixtureList');
+  const homeView = document.getElementById('homeView');
+  const analysisView = document.getElementById('analysisView');
+  const analysisContent = document.getElementById('analysisContent');
+  const dateInput = document.getElementById('matchDate');
 
-const fixtureList =
-  document.getElementById(
-    "fixtureList"
-  );
+  // Geri dönünce TAM olarak hangi pikselde kaldıysak orayı aç.
+  let savedListScrollY = 0;
+  let lastViewedFixtureId = null;
+  let analysisRequestNumber = 0;
+  let fixtureRequestNumber = 0;
 
-const homeView =
-  document.getElementById(
-    "homeView"
-  );
+  function escapeHtml(value) {
+    return String(value ?? '').replace(/[&<>"']/g, c => ({
+      '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+    })[c]);
+  }
 
-const analysisView =
-  document.getElementById(
-    "analysisView"
-  );
+  function turkeyToday() {
+    const parts = new Intl.DateTimeFormat('en-CA', {
+      timeZone: 'Europe/Istanbul', year: 'numeric', month: '2-digit', day: '2-digit'
+    }).formatToParts(new Date());
+    const item = Object.fromEntries(parts.map(part => [part.type, part.value]));
+    return `${item.year}-${item.month}-${item.day}`;
+  }
+  dateInput.value = turkeyToday();
 
-const analysisContent =
-  document.getElementById(
-    "analysisContent"
-  );
+  async function loadFixtures() {
+    const requestNumber = ++fixtureRequestNumber;
+    const date = dateInput.value;
+    fixtureList.className = 'status';
+    fixtureList.innerHTML = '<div class="loader"></div>Maçlar getiriliyor...';
+    lastViewedFixtureId = null;
+    savedListScrollY = 0;
 
-
-// =====================================================
-// TÜRKİYE TARİHİ
-// =====================================================
-
-function turkeyToday() {
-
-  const parts =
-    new Intl.DateTimeFormat(
-      "en-CA",
-      {
-        timeZone:
-          "Europe/Istanbul",
-
-        year:
-          "numeric",
-
-        month:
-          "2-digit",
-
-        day:
-          "2-digit"
+    try {
+      const res = await fetch(`/api/football?action=fixtures&date=${encodeURIComponent(date)}`);
+      const data = await res.json();
+      if (requestNumber !== fixtureRequestNumber) return;
+      if (!res.ok) throw new Error(data.error || 'Maçlar alınamadı.');
+      const fixtures = Array.isArray(data.fixtures) ? data.fixtures : [];
+      if (!fixtures.length) {
+        fixtureList.innerHTML = 'Bu tarihte seçili 10 lig ve 3 UEFA kupasında maç bulunamadı.';
+        return;
       }
-    ).formatToParts(
-      new Date()
-    );
 
-  const obj = {};
-
-  parts.forEach(
-    p => {
-      obj[p.type] =
-        p.value;
-    }
-  );
-
-  return (
-    `${obj.year}-${obj.month}-${obj.day}`
-  );
-}
-
-
-document
-  .getElementById(
-    "matchDate"
-  )
-  .value =
-  turkeyToday();
-
-
-// =====================================================
-// MAÇLARI GETİR
-// =====================================================
-
-async function loadFixtures() {
-
-  const date =
-    document
-      .getElementById(
-        "matchDate"
-      )
-      .value;
-
-
-  fixtureList.innerHTML = `
-    <div class="loader"></div>
-
-    Maçlar getiriliyor...
-  `;
-
-
-  try {
-
-    const res =
-      await fetch(
-        `/api/football?action=fixtures&date=${date}`
-      );
-
-
-    const data =
-      await res.json();
-
-
-    if (!res.ok) {
-
-      throw new Error(
-        data.error ||
-        "Maçlar alınamadı."
-      );
-
-    }
-
-
-    if (
-      !data.fixtures ||
-      data.fixtures.length === 0
-    ) {
-
-      fixtureList.innerHTML = `
-        <div class="status">
-          Bu tarihte bizim
-          seçili liglerimizde
-          maç bulunamadı.
-        </div>
-      `;
-
-      return;
-
-    }
-
-
-    fixtureList.innerHTML = "";
-
-
-    data.fixtures.forEach(
-      match => {
-
-        const el =
-          document.createElement(
-            "div"
-          );
-
-
-        el.className =
-          "match";
-
-
-        el.innerHTML = `
-
-          <div class="match-time">
-            ${match.league || ""}
-            •
-            ${match.time || ""}
-          </div>
-
-
+      fixtureList.className = '';
+      fixtureList.innerHTML = '';
+      const fragment = document.createDocumentFragment();
+      for (const match of fixtures) {
+        const card = document.createElement('button');
+        card.type = 'button';
+        card.className = 'match';
+        card.dataset.fixtureId = String(match.fixtureId);
+        card.innerHTML = `
+          <div class="match-time">${escapeHtml(match.league)} • ${escapeHtml(match.time)}</div>
           <div class="teams">
-
-            <div class="team">
-              ${match.home}
-            </div>
-
-
-            <div class="vs">
-              VS
-            </div>
-
-
-            <div class="team right">
-              ${match.away}
-            </div>
-
-          </div>
-        `;
-
-
-        el.onclick = () => {
-
-          analyzeMatch(
-            match.fixtureId,
-            match.homeId,
-            match.awayId,
-            match.home,
-            match.away
-          );
-
-        };
-
-
-        fixtureList
-          .appendChild(
-            el
-          );
-
+            <div class="team">${escapeHtml(match.home)}</div>
+            <div class="vs">VS</div>
+            <div class="team right">${escapeHtml(match.away)}</div>
+          </div>`;
+        card.addEventListener('click', () => analyzeMatch(match));
+        fragment.appendChild(card);
       }
-    );
-
-  }
-
-  catch (err) {
-
-    fixtureList.innerHTML = `
-      <div class="error">
-        ${err.message}
-      </div>
-    `;
-
-  }
-
-}
-
-
-// =====================================================
-// MAÇ ANALİZİ
-// =====================================================
-
-async function analyzeMatch(
-  fixtureId,
-  homeId,
-  awayId,
-  homeName,
-  awayName
-) {
-
-  homeView
-    .classList
-    .add(
-      "hidden"
-    );
-
-
-  analysisView
-    .classList
-    .remove(
-      "hidden"
-    );
-
-
-  window.scrollTo(
-    {
-      top: 0,
-      behavior: "smooth"
+      fixtureList.appendChild(fragment);
+    } catch (err) {
+      if (requestNumber !== fixtureRequestNumber) return;
+      fixtureList.className = '';
+      fixtureList.innerHTML = `<div class="error">${escapeHtml(err.message)}</div>`;
     }
-  );
+  }
 
-
-  analysisContent.innerHTML = `
-
-    <div class="loader"></div>
-
-    <div class="status">
-      Son 5 maç
-      analiz ediliyor...
-    </div>
-
-  `;
-
-
-  try {
-
-    const res =
-      await fetch(
-        `/api/football?action=analyze&home=${homeId}&away=${awayId}`
+  function markLastViewed() {
+    fixtureList.querySelectorAll('.match').forEach(card => {
+      card.classList.toggle(
+        'last-viewed', card.dataset.fixtureId === String(lastViewedFixtureId)
       );
-
-
-    const data =
-      await res.json();
-
-
-    if (!res.ok) {
-
-      throw new Error(
-        data.error ||
-        "Analiz alınamadı."
-      );
-
-    }
-
-
-    analysisContent.innerHTML = `
-
-      <div class="fixture-title">
-
-        ${homeName}
-
-        <br>
-
-        <span
-          style="
-            color:#35d28c;
-            font-size:13px;
-          "
-        >
-          VS
-        </span>
-
-        <br>
-
-        ${awayName}
-
-      </div>
-
-
-      ${renderTeam(
-        data.home
-      )}
-
-
-      ${renderTeam(
-        data.away
-      )}
-
-    `;
-
+    });
   }
 
-  catch (err) {
+  async function analyzeMatch(match) {
+    // Gizlemeden ÖNCE konumu kaydet. Gizlendikten sonra scrollY sıfırlanabilir.
+    savedListScrollY = window.scrollY || document.documentElement.scrollTop || 0;
+    lastViewedFixtureId = match.fixtureId;
+    const requestNumber = ++analysisRequestNumber;
 
-    analysisContent.innerHTML = `
+    homeView.classList.add('hidden');
+    analysisView.classList.remove('hidden');
+    window.scrollTo(0, 0);
+    analysisContent.innerHTML = '<div class="loader"></div><div class="status">Son 5 maç analiz ediliyor...</div>';
 
-      <div class="error">
-        ${err.message}
-      </div>
+    try {
+      const url = `/api/football?action=analyze&home=${encodeURIComponent(match.homeId)}&away=${encodeURIComponent(match.awayId)}`;
+      const res = await fetch(url);
+      const data = await res.json();
+      // Analiz sürerken geri dönülürse geç gelen cevap eski ekranı bozmasın.
+      if (requestNumber !== analysisRequestNumber) return;
+      if (!res.ok) throw new Error(data.error || 'Analiz alınamadı.');
 
-    `;
-
-  }
-
-}
-
-
-// =====================================================
-// TAKIM EKRANI
-// =====================================================
-
-function renderTeam(team) {
-
-  if (!team) {
-    return "";
-  }
-
-
-  const games =
-    team.matches || [];
-
-
-  return `
-
-    <div class="team-box">
-
-
-      <div class="team-name">
-
-        ${team.name}
-
-      </div>
-
-
-      <div class="team-note">
-
-        Tamamlanmış son
-        ${games.length}
-        maç
-
-      </div>
-
-
-      ${games.map(
-        game => `
-
-
-        <div class="game-card">
-
-
-          <div class="game-head">
-
-
-            <div class="opponent">
-
-              ${game.home}
-              -
-              ${game.away}
-
-            </div>
-
-
-            <div class="score">
-
-              ${game.score}
-
-            </div>
-
-
-          </div>
-
-
-          <div class="stats">
-
-
-            ${statBox(
-              "Toplam Şut",
-              game.shots
-            )}
-
-
-            ${statBox(
-              "İsabetli Şut",
-              game.shotsOnTarget
-            )}
-
-
-            ${statBox(
-              "Korner",
-              game.corners
-            )}
-
-
-            ${statBox(
-              "Kaleci Kurtarışı",
-              game.saves
-            )}
-
-
-          </div>
-
-
+      analysisContent.innerHTML = `
+        <div class="fixture-title">
+          ${escapeHtml(match.home)}<br>
+          <span style="color:#35d28c;font-size:13px">VS</span><br>
+          ${escapeHtml(match.away)}
         </div>
-
-      `
-      ).join("")}
-
-
-      ${renderAverage(
-        team.average
-      )}
-
-
-    </div>
-  `;
-
-}
-
-
-// =====================================================
-// İSTATİSTİK KUTUSU
-// =====================================================
-
-function statBox(
-  label,
-  value
-) {
-
-  return `
-
-    <div class="stat">
-
-      <span class="stat-label">
-        ${label}
-      </span>
-
-      <span class="stat-value">
-        ${value ?? "-"}
-      </span>
-
-    </div>
-
-  `;
-
-}
-
-
-// =====================================================
-// SON 5 ORTALAMA
-// =====================================================
-
-function renderAverage(avg) {
-
-  if (!avg) {
-    return "";
+        ${renderTeam(data.home)}
+        ${renderTeam(data.away)}`;
+    } catch (err) {
+      if (requestNumber !== analysisRequestNumber) return;
+      analysisContent.innerHTML = `<div class="error">${escapeHtml(err.message)}</div>`;
+    }
   }
 
+  function renderTeam(team) {
+    if (!team) return '';
+    const games = Array.isArray(team.matches) ? team.matches : [];
+    return `
+      <div class="team-box">
+        <div class="team-name">${escapeHtml(team.name)}</div>
+        <div class="team-note">Tamamlanmış son ${games.length} geçerli maç</div>
+        ${games.map(game => `
+          <div class="game-card">
+            <div class="game-head">
+              <div class="opponent">${escapeHtml(game.home)} - ${escapeHtml(game.away)}</div>
+              <div class="score">${escapeHtml(game.score)}</div>
+            </div>
+            <div class="stats">
+              ${statBox('Toplam Şut', game.shots)}
+              ${statBox('İsabetli Şut', game.shotsOnTarget)}
+              ${statBox('Korner', game.corners)}
+              ${statBox('Kaleci Kurtarışı', game.saves)}
+            </div>
+          </div>`).join('')}
+        ${renderAverage(team.average)}
+      </div>`;
+  }
 
-  return `
+  function statBox(label, value) {
+    return `<div class="stat">
+      <span class="stat-label">${escapeHtml(label)}</span>
+      <span class="stat-value">${escapeHtml(value ?? '-')}</span>
+    </div>`;
+  }
 
-    <div class="average">
-
-
-      <div class="average-title">
-
-        SON 5 ORTALAMA
-
-      </div>
-
-
+  function renderAverage(avg) {
+    if (!avg) return '';
+    return `<div class="average">
+      <div class="average-title">SON 5 ORTALAMA</div>
       <div class="stats">
-
-
-        ${statBox(
-          "Toplam Şut",
-          avg.shots
-        )}
-
-
-        ${statBox(
-          "İsabetli Şut",
-          avg.shotsOnTarget
-        )}
-
-
-        ${statBox(
-          "Korner",
-          avg.corners
-        )}
-
-
-        ${statBox(
-          "Kaleci Kurtarışı",
-          avg.saves
-        )}
-
-
+        ${statBox('Toplam Şut', avg.shots)}
+        ${statBox('İsabetli Şut', avg.shotsOnTarget)}
+        ${statBox('Korner', avg.corners)}
+        ${statBox('Kaleci Kurtarışı', avg.saves)}
       </div>
+    </div>`;
+  }
 
+  function goBack() {
+    ++analysisRequestNumber;
+    analysisView.classList.add('hidden');
+    homeView.classList.remove('hidden');
+    markLastViewed();
 
-    </div>
-
-  `;
-
-}
-
-
-// =====================================================
-// GERİ DÖN
-// =====================================================
-
-function goBack() {
-
-  analysisView
-    .classList
-    .add(
-      "hidden"
-    );
-
-
-  homeView
-    .classList
-    .remove(
-      "hidden"
-    );
-
-
-  window.scrollTo(
-    {
-      top: 0,
-      behavior: "smooth"
-    }
-  );
-
-}
-
+    // iPhone Safari'de DOM yeniden görünür olduktan sonra kaydırmayı iade et.
+    const previousPosition = savedListScrollY;
+    window.scrollTo(0, previousPosition);
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => window.scrollTo(0, previousPosition));
+    });
+  }
 </script>
-
-
-<!-- ===================================================
-     SERVICE WORKER
-=================================================== -->
 
 <script>
-
-if (
-  "serviceWorker"
-  in navigator
-) {
-
-  window.addEventListener(
-    "load",
-    () => {
-
-      navigator
-        .serviceWorker
-        .register(
-          "/sw.js"
-        )
-        .catch(
-          err =>
-            console.error(
-              "Service Worker:",
-              err
-            )
-        );
-
-    }
-  );
-
-}
-
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/sw.js').catch(err => {
+        console.error('Service Worker:', err);
+      });
+    });
+  }
 </script>
-
-
 </body>
 </html>
